@@ -1,0 +1,5 @@
+# Railway deployment
+# This file tells Railway how to deploy
+
+[build]
+dockerfilePath = "Dockerfile"
