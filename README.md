@@ -1,28 +1,12 @@
-# OpenClaw Integration for MiroFish
+# OpenClaw Unified Service for MiroFish
 
-This repo provides two services that let MiroFish use OpenClaw infrastructure:
+Single-port service combining Zep Adapter + LLM Proxy for Railway deployment.
 
-## 🧠 Zep Adapter (Port 5002)
+## 🎯 Why Unified?
 
-Mimics Zep Cloud's REST API using OpenClaw's Supabase pgvector for agent memory.
+Railway only exposes **one public port**. This service runs both on the same port with different routes.
 
-**Endpoints:**
-- `POST /api/v2/sessions` - Create session
-- `POST /api/v2/sessions/{id}/memory` - Add memory
-- `GET /api/v2/sessions/{id}/memory` - Get memories
-- `POST /api/v2/sessions/{id}/search` - Search memories
-
-## 🤖 LLM Proxy (Port 5003)
-
-Exposes OpenClaw's Ollama models via OpenAI-compatible API.
-
-**Endpoints:**
-- `POST /v1/chat/completions` - Chat completions
-- `POST /v1/completions` - Text completions
-- `POST /v1/embeddings` - Embeddings
-- `GET /v1/models` - List models
-
-## 🚀 Quick Deploy to Railway
+## 🚀 Quick Deploy
 
 1. **Connect GitHub repo** to Railway
 2. **Add environment variables:**
@@ -37,37 +21,53 @@ Exposes OpenClaw's Ollama models via OpenAI-compatible API.
 Update your `.env`:
 
 ```bash
-# Memory (Zep) - now uses OpenClaw
-ZEP_API_URL=https://your-railway-app.up.railway.app
+# Memory (Zep) - uses /zep routes
+ZEP_API_URL=https://your-railway-app.up.railway.app/zep
 ZEP_API_KEY=not-needed
 
-# LLM - now uses OpenClaw
-LLM_API_URL=https://your-railway-app.up.railway.app:5003/v1
+# LLM - uses /llm routes  
+LLM_API_URL=https://your-railway-app.up.railway.app/llm/v1
 LLM_API_KEY=not-needed
 LLM_MODEL_NAME=gpt-4
 ```
 
-## 🎯 What This Gives You
+## 📡 API Routes
 
-✅ **No separate LLM API keys** - uses OpenClaw's Ollama
-✅ **Shared memory** - MiroFish memories = OpenClaw memories
-✅ **Unified infrastructure** - everything in one place
-✅ **Cost savings** - no external API costs
+### Zep Adapter (Memory)
+- `POST /zep/api/v2/sessions` - Create session
+- `GET /zep/api/v2/sessions/{id}` - Get session
+- `POST /zep/api/v2/sessions/{id}/memory` - Add memory
+- `GET /zep/api/v2/sessions/{id}/memory` - Get memories
+- `POST /zep/api/v2/sessions/{id}/search` - Search memories
+
+### LLM Proxy
+- `GET /llm/v1/models` - List models
+- `POST /llm/v1/chat/completions` - Chat completions
+- `POST /llm/v1/embeddings` - Embeddings
+
+### Health
+- `GET /health` - Service health check
 
 ## 🧪 Testing
 
 ```bash
-# Test Zep Adapter
+# Health check
 curl https://your-app.up.railway.app/health
 
-# Test LLM Proxy
-curl https://your-app.up.railway.app:5003/v1/models
-
-# Test chat completion
-curl -X POST https://your-app.up.railway.app:5003/v1/chat/completions \
+# Test Zep
+curl -X POST https://your-app.up.railway.app/zep/api/v2/sessions \
   -H "Content-Type: application/json" \
-  -d '{
-    "model": "gpt-4",
-    "messages": [{"role": "user", "content": "Hello"}]
-  }'
+  -d '{"user_id": "test"}'
+
+# Test LLM
+curl -X POST https://your-app.up.railway.app/llm/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
+
+## 🎉 Benefits
+
+- ✅ Single port (Railway compatible)
+- ✅ Both services share one deployment
+- ✅ Unified health monitoring
+- ✅ Simpler configuration

@@ -5,18 +5,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py llm-proxy.py .
+COPY unified-service.py app.py
 
-# Environment variables
 ENV PORT=5002
-ENV LLM_PROXY_PORT=5003
-ENV OLLAMA_URL=http://ollama.railway.internal:11434
 ENV PYTHONUNBUFFERED=1
 
-EXPOSE 5002 5003
+EXPOSE 5002
 
-# Run both services using a process manager or script
-COPY start-services.sh .
-RUN chmod +x start-services.sh
-
-CMD ["./start-services.sh"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5002", "--workers", "4", "--timeout", "300", "app:app"]
