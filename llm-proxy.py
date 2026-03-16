@@ -118,7 +118,7 @@ def chat_completions():
                         try:
                             chunk = json.loads(line)
                             if 'response' in chunk:
-                                yield f"data: {json.dumps({
+                                data = {
                                     'id': str(uuid.uuid4()),
                                     'object': 'chat.completion.chunk',
                                     'created': int(time.time()),
@@ -128,7 +128,8 @@ def chat_completions():
                                         'delta': {'content': chunk['response']},
                                         'finish_reason': None
                                     }]
-                                })}\n\n"
+                                }
+                                yield f"data: {json.dumps(data)}\n\n"
                         except:
                             pass
                 

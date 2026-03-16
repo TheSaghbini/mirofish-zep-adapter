@@ -39,11 +39,12 @@ def init_db():
     """)
     
     # Create mirofish_memories table (links to OpenClaw agent_memory)
+    # Note: agent_memory.id is UUID, so we store it as TEXT without FK constraint
     cur.execute("""
         CREATE TABLE IF NOT EXISTS mirofish_memories (
             id TEXT PRIMARY KEY,
             session_id TEXT REFERENCES mirofish_sessions(id),
-            agent_memory_id INTEGER REFERENCES agent_memory(id),
+            agent_memory_id TEXT,
             content TEXT NOT NULL,
             role TEXT DEFAULT 'user',
             created_at TIMESTAMP DEFAULT NOW()
